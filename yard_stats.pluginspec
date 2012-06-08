@@ -1,6 +1,6 @@
 Jenkins::Plugin::Specification.new do |plugin|
   plugin.name = "yard_stats"
-  plugin.display_name = "Yard Stats Plugin"
+  plugin.display_name = "YARD Stats Plugin"
   plugin.version = '0.0.1'
   plugin.description = 'TODO: enter description here'
 
