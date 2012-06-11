@@ -1,21 +1,11 @@
-require 'stringio'
+require File.expand_path(File.dirname(__FILE__) + '/../lib/kernel_ext')
 require 'yard'
 
-module Kernel
-  def capture_stdout
-    out = StringIO.new
-    $stdout = out
-    yield
-    return out
-  ensure
-    $stdout = STDOUT
-  end
-end
 
 class YardPublisher < Jenkins::Tasks::Publisher
   display_name "Publish YARD stats"
 
-  LINES = %r[^\S+\s+(?<total>\d+)\s\(\s+(?<undocumented>\d+)]
+  LINES = %r[^\S*\s+(?<total>\d+)(\s\(\s+(?<undocumented>\d+))?]
 
   attr_reader :yard_file_glob
 
@@ -27,40 +17,34 @@ class YardPublisher < Jenkins::Tasks::Publisher
     @cli ||= ::YARD::CLI::Stats.new
   end
 
-  def perform(build, launcher, listener)
-    listener.info "Build env: #{build.workspace}"
-    listener.info "About to start gettin funky with YARD..."
-    listener.info "yard file glob: #{@yard_file_glob}"
+  def log(msg)
+    @listener.info "YARD plugin: #{msg}"
+  end
+
+  def perform(build, launcher, local_listener)
+    @listener = local_listener
+    log "About to start gettin funky with YARD..."
+    log "Checking glob: #{@yard_file_glob}"
 
     cli.run "#{build.workspace}/#{@yard_file_glob}"
 
     files = stats_for :files
-    listener.info "total: #{files[:total]}"
-    listener.info "undocumented: #{files[:undocumented]}"
-
     modules = stats_for :modules
-    listener.info "total: #{modules[:total]}"
-    listener.info "undocumented: #{modules[:undocumented]}"
-
     classes = stats_for :classes
-    listener.info "total: #{classes[:total]}"
-    listener.info "undocumented: #{classes[:undocumented]}"
-
     constants = stats_for :constants
-    listener.info "total: #{constants[:total]}"
-    listener.info "undocumented: #{constants[:undocumented]}"
-
     methods = stats_for :methods
-    listener.info "total: #{methods[:total]}"
-    listener.info "undocumented: #{methods[:undocumented]}"
   end
 
   private
 
   def stats_for(type)
     out = capture_stdout { cli.send("stats_for_#{type}".to_sym) }
+    stats = out.match(LINES)
+    percent = (stats[:undocumented] || 0).to_i / stats[:total].to_f * 100
+    log "Total #{type}: #{stats[:total]}"
+    log "Undocumented #{type}: #{stats[:undocumented] || 0} (#{"%0.2f" % percent}%)"
 
-    out.string.match(LINES)
+    stats
   end
 end
 
