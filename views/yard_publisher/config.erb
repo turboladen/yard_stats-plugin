@@ -1,8 +1,8 @@
 <%
-   f = taglib("/lib/form")
-   f.entry(:title => 'YARD publisher stuff',
-           :field => 'yard_file_glob',
-           :description => 'The files (expressed as a glob) to get stats for') do
-     f.textbox
-   end
+  f = taglib("/lib/form")
+  f.entry(:title => 'Files to check (as a glob)',
+          :field => 'yard_file_glob',
+          :description => 'The files (expressed as a glob) to get stats for') do
+    f.textbox :default => 'lib/**/*.rb'
+  end
 %>
