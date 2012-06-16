@@ -1,4 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/../lib/kernel_ext')
+require File.expand_path(File.dirname(__FILE__) + '/yard_stats_action')
 require 'yard'
 
 
@@ -25,6 +26,9 @@ class YardPublisher < Jenkins::Tasks::Publisher
     @listener = local_listener
     log "About to start gettin funky with YARD..."
     log "Checking glob: #{@yard_file_glob}"
+    yard_action = YardStatsAction.new
+    puts "yard action methods: #{yard_action.methods}"
+    build.add_action(yard_action)
 
     cli.run "#{build.workspace}/#{@yard_file_glob}"
 
@@ -33,6 +37,12 @@ class YardPublisher < Jenkins::Tasks::Publisher
     classes = stats_for :classes
     constants = stats_for :constants
     methods = stats_for :methods
+
+    puts "build class: #{build.class}"
+    puts "publisher methods: #{self.methods}"
+    #puts "build project: #{build.project.inspect}"
+    #puts "build project actions: #{build.project.actions}"
+    puts "project action: #{project_action(build.project)}"
   end
 
   private
