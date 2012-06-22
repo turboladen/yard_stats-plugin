@@ -26,9 +26,6 @@ class YardPublisher < Jenkins::Tasks::Publisher
     @listener = local_listener
     log "About to start gettin funky with YARD..."
     log "Checking glob: #{@yard_file_glob}"
-    yard_action = YardStatsAction.new
-    puts "yard action methods: #{yard_action.methods}"
-    build.add_action(yard_action)
 
     cli.run "#{build.workspace}/#{@yard_file_glob}"
 
@@ -43,6 +40,10 @@ class YardPublisher < Jenkins::Tasks::Publisher
     #puts "build project: #{build.project.inspect}"
     #puts "build project actions: #{build.project.actions}"
     puts "project action: #{project_action(build.project)}"
+  end
+
+  def project_action(project)
+    YardStatsAction.new
   end
 
   private

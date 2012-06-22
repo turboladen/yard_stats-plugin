@@ -1,11 +1,19 @@
-class YardStatsAction < Jenkins::Model::HealthReportingAction
+class YardStatsAction < Jenkins::Model::ProminentProjectAction
   display_name 'Yard Stats'
   icon 'gear.png'
+  url_path 'yard_stuff'
 
   def getIconFileName
-    # Defining so I don't get an error saying this isn't defined.  Not sure why
-    # I'm getting that error, since this method is defined in Action, which is
-    # included in HealthReportingAction.
+    self.class.icon
+  end
+
+  def getUrlName
+    self.class.url_path
+  end
+
+  def pants
+    puts "pants called"
+    "PATNS"
   end
 end
 
